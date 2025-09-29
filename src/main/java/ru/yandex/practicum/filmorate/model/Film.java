@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -21,7 +20,7 @@ public class Film {
     @NotBlank(message = "Описание фильма не может быть пустым.")
     @Size(max = 200, message = "Описание не может превышать 200 символов.")
     private String description;
-    
+
     @PastOrPresent(message = "Дата релиза не может быть в будущем времени")
     private LocalDate releaseDate;
 
