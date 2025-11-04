@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,8 +51,8 @@ public class FilmControllerTest {
         film.setDescription("Action adventure");
         film.setReleaseDate(LocalDate.of(2022, 2, 18));
         film.setDuration(116);
-        film.setMpaRating(MpaRating.valueOf("G"));      // Ссылается на MPA ID=1
-        film.setGenreIds((java.util.Set<Integer>) java.util.List.of(1)); // Ссылается на Genre ID=1
+        film.setMpaRating(MpaRating.G);
+        film.setGenreIds(Set.of(1));
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -66,8 +67,8 @@ public class FilmControllerTest {
         film.setDescription("Too long description".repeat(100));
         film.setReleaseDate(LocalDate.of(2015, 8, 22));
         film.setDuration(190);
-        film.setMpaRating(MpaRating.valueOf("G"));
-        film.setGenreIds((java.util.Set<Integer>) java.util.List.of(1));
+        film.setMpaRating(MpaRating.G);
+        film.setGenreIds(Set.of(1));
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -82,8 +83,8 @@ public class FilmControllerTest {
         film.setDescription("description");
         film.setReleaseDate(LocalDate.of(1850, 4, 21));
         film.setDuration(90);
-        film.setMpaRating(MpaRating.valueOf("G"));
-        film.setGenreIds((java.util.Set<Integer>) java.util.List.of(1));
+        film.setMpaRating(MpaRating.G);
+        film.setGenreIds(Set.of(1));
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -98,8 +99,8 @@ public class FilmControllerTest {
         film.setDescription("Negative");
         film.setReleaseDate(LocalDate.of(2024, 5, 7));
         film.setDuration(-9);
-        film.setMpaRating(MpaRating.valueOf("G"));
-        film.setGenreIds((java.util.Set<Integer>) java.util.List.of(1));
+        film.setMpaRating(MpaRating.G);
+        film.setGenreIds(Set.of(1));
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)

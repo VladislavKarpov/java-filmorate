@@ -23,9 +23,9 @@ public enum MpaRating {
 
     @JsonCreator
     public static MpaRating fromString(String value) {
-        for (MpaRating r : values()) {
-            if (r.label.equalsIgnoreCase(value) || r.name().equalsIgnoreCase(value)) {
-                return r;
+        for (MpaRating mpaRating : values()) {
+            if (mpaRating.label.equalsIgnoreCase(value) || mpaRating.name().equalsIgnoreCase(value)) {
+                return mpaRating;
             }
         }
         throw new IllegalArgumentException("Unknown MpaRating: " + value);
