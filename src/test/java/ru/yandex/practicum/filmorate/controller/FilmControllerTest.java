@@ -1,17 +1,18 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -26,6 +27,22 @@ public class FilmControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    public void setUp() {
+        // Очищаем таблицы перед каждым тестом
+        jdbcTemplate.execute("DELETE FROM films");
+        jdbcTemplate.execute("DELETE FROM mpa");
+        jdbcTemplate.execute("DELETE FROM genres");
+        jdbcTemplate.execute("DELETE FROM film_genres");
+
+        // Создаем минимальные данные для MPA и жанров
+        jdbcTemplate.update("INSERT INTO mpa (id, name) VALUES (?, ?)", 1, "G");
+        jdbcTemplate.update("INSERT INTO genres (id, name) VALUES (?, ?)", 1, "Action");
+    }
+
     @Test
     public void createFilmWhenValidData() throws Exception {
         Film film = new Film();
@@ -33,8 +50,8 @@ public class FilmControllerTest {
         film.setDescription("Action adventure");
         film.setReleaseDate(LocalDate.of(2022, 2, 18));
         film.setDuration(116);
-        film.setGenreIds(Set.of(1));   // хотя бы один жанр
-        film.setMpaRating(MpaRating.G); // валидный рейтинг
+        film.setMpaRating(MpaRating.valueOf("G"));      // Ссылается на MPA ID=1
+        film.setGenreIds((java.util.Set<Integer>) java.util.List.of(1)); // Ссылается на Genre ID=1
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -49,12 +66,13 @@ public class FilmControllerTest {
         film.setDescription("Too long description".repeat(100));
         film.setReleaseDate(LocalDate.of(2015, 8, 22));
         film.setDuration(190);
+        film.setMpaRating(MpaRating.valueOf("G"));
+        film.setGenreIds((java.util.Set<Integer>) java.util.List.of(1));
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(film)))
                 .andExpect(status().isBadRequest());
-
     }
 
     @Test
@@ -64,12 +82,13 @@ public class FilmControllerTest {
         film.setDescription("description");
         film.setReleaseDate(LocalDate.of(1850, 4, 21));
         film.setDuration(90);
+        film.setMpaRating(MpaRating.valueOf("G"));
+        film.setGenreIds((java.util.Set<Integer>) java.util.List.of(1));
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(film)))
                 .andExpect(status().isBadRequest());
-
     }
 
     @Test
@@ -79,6 +98,8 @@ public class FilmControllerTest {
         film.setDescription("Negative");
         film.setReleaseDate(LocalDate.of(2024, 5, 7));
         film.setDuration(-9);
+        film.setMpaRating(MpaRating.valueOf("G"));
+        film.setGenreIds((java.util.Set<Integer>) java.util.List.of(1));
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
