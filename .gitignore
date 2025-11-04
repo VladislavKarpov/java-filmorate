@@ -44,3 +44,9 @@ build/
 
 *.db
 db/*
+
+*.class
+*.jar
+*.DS_Store
+/out
+/target
