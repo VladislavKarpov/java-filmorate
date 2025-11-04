@@ -8,8 +8,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,9 +31,11 @@ public class FilmControllerTest {
     public void createFilmWhenValidData() throws Exception {
         Film film = new Film();
         film.setName("Uncharted");
-        film.setDescription("Action advanture");
-        film.setReleaseDate(LocalDate.of(2022, 02, 18));
+        film.setDescription("Action adventure");
+        film.setReleaseDate(LocalDate.of(2022, 2, 18));
         film.setDuration(116);
+        film.setGenreIds(Set.of(1));   // хотя бы один жанр
+        film.setMpaRating(MpaRating.G); // валидный рейтинг
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
