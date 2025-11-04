@@ -20,11 +20,16 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        log.info("Выполнен  запрос на создание фильма. Созданный фильм: {}", film);
+        log.info("Выполнен запрос на создание фильма: {}", film);
 
         if (film.getName() == null || film.getName().isBlank()) {
-            log.warn("Ошибка валидации: пустое имя фильма");
             throw new NotFoundException("Название фильма не может быть пустым");
+        }
+        if (film.getMpaRating() == null) {
+            throw new NotFoundException("У фильма должен быть рейтинг");
+        }
+        if (film.getGenreIds() == null || film.getGenreIds().isEmpty()) {
+            throw new NotFoundException("У фильма должен быть хотя бы один жанр");
         }
 
         return filmService.create(film);
