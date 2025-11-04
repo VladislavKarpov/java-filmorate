@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
-
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -33,13 +33,11 @@ public class FilmControllerTest {
 
     @BeforeEach
     public void setUp() {
-        // Очищаем таблицы перед каждым тестом
-        jdbcTemplate.execute("DELETE FROM films");
-        jdbcTemplate.execute("DELETE FROM mpa");
-        jdbcTemplate.execute("DELETE FROM genres");
         jdbcTemplate.execute("DELETE FROM film_genres");
+        jdbcTemplate.execute("DELETE FROM films");
+        jdbcTemplate.execute("DELETE FROM genres");
+        jdbcTemplate.execute("DELETE FROM mpa");
 
-        // Создаем минимальные данные для MPA и жанров
         jdbcTemplate.update("INSERT INTO mpa (id, name) VALUES (?, ?)", 1, "G");
         jdbcTemplate.update("INSERT INTO genres (id, name) VALUES (?, ?)", 1, "Action");
     }
@@ -52,6 +50,7 @@ public class FilmControllerTest {
         film.setReleaseDate(LocalDate.of(2022, 2, 18));
         film.setDuration(116);
         film.setGenreIds(Set.of(1));
+        film.setMpa(new Mpa(1, "G")); // Обязательно указываем MPA
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -67,6 +66,7 @@ public class FilmControllerTest {
         film.setReleaseDate(LocalDate.of(2015, 8, 22));
         film.setDuration(190);
         film.setGenreIds(Set.of(1));
+        film.setMpa(new Mpa(1, "G"));
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -82,6 +82,7 @@ public class FilmControllerTest {
         film.setReleaseDate(LocalDate.of(1850, 4, 21));
         film.setDuration(90);
         film.setGenreIds(Set.of(1));
+        film.setMpa(new Mpa(1, "G"));
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -97,6 +98,7 @@ public class FilmControllerTest {
         film.setReleaseDate(LocalDate.of(2024, 5, 7));
         film.setDuration(-9);
         film.setGenreIds(Set.of(1));
+        film.setMpa(new Mpa(1, "G"));
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
