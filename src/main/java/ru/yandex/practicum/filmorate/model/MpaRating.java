@@ -12,10 +12,14 @@ public enum MpaRating {
 
     private final String label;
 
-    MpaRating(String label) { this.label = label; }
+    MpaRating(String label) {
+        this.label = label;
+    }
 
     @JsonValue
-    public String getLabel() { return label; }
+    public String getLabel() {
+        return label;
+    }
 
     @JsonCreator
     public static MpaRating fromString(String value) {
