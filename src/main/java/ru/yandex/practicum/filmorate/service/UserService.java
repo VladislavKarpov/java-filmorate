@@ -50,9 +50,9 @@ public class UserService {
         checkUserExists(userId);
         checkUserExists(friendId);
 
+        // односторонняя заявка: userId -> friendId
         friendsMap.computeIfAbsent(userId, k -> new HashSet<>()).add(friendId);
-        friendsMap.computeIfAbsent(friendId, k -> new HashSet<>()).add(userId);
-        log.info("Пользователи {} и {} теперь друзья", userId, friendId);
+        log.info("Пользователь {} добавил в друзья пользователя {}", userId, friendId);
     }
 
     public void removeFriend(Long userId, Long friendId) {
@@ -60,9 +60,9 @@ public class UserService {
         checkUserExists(userId);
         checkUserExists(friendId);
 
+        // удаляем только связь userId -> friendId (т.к. дружба стала односторонней)
         friendsMap.getOrDefault(userId, new HashSet<>()).remove(friendId);
-        friendsMap.getOrDefault(friendId, new HashSet<>()).remove(userId);
-        log.info("Пользователи {} и {} больше не друзья", userId, friendId);
+        log.info("Пользователь {} удалил из друзей пользователя {}", userId, friendId);
     }
 
     public List<User> getFriends(Long userId) {

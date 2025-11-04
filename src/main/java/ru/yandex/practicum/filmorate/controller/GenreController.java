@@ -12,18 +12,17 @@ import java.util.List;
 @RequestMapping("/genres")
 @RequiredArgsConstructor
 public class GenreController {
-
     private final GenreDbStorage genreDbStorage;
 
     @GetMapping
-    public List<Genre> findAll() {
+    public List<Genre> getAll() {
         return genreDbStorage.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Genre> findById(@PathVariable int id) {
+    public ResponseEntity<Genre> getById(@PathVariable int id) {
         return genreDbStorage.findById(id)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 }

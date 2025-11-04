@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+
 public class FilmService {
 
     private final FilmStorage filmStorage;
@@ -26,9 +27,9 @@ public class FilmService {
 
 
     public Film create(Film film) {
-        log.info("Создание фильма: {}", film.getName());
-        filmStorage.create(film);
-        return film;
+        Film created = filmStorage.create(film);
+        log.info("Создан фильм: id={}, name={}", created.getId(), created.getName());
+        return created;
     }
 
 

@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -20,11 +19,11 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        log.info("Выполнен  запрос на создание фильма. Созданный фильм: {}", film);
+        log.info("Выполнен запрос на создание фильма. Созданный фильм: {}", film);
 
         if (film.getName() == null || film.getName().isBlank()) {
             log.warn("Ошибка валидации: пустое имя фильма");
-            throw new NotFoundException("Название фильма не может быть пустым");
+            throw new IllegalArgumentException("Название фильма не может быть пустым");
         }
 
         return filmService.create(film);
@@ -65,6 +64,12 @@ public class FilmController {
         log.info("Получение топ-{} популярных фильмов", count);
 
         return filmService.getMostPopularFilms(count);
+    }
+
+    @GetMapping("/{id}")
+    public Film getById(@PathVariable Long id) {
+        log.info("Получение фильма по id={}", id);
+        return filmService.findById(id);
     }
 
 }
