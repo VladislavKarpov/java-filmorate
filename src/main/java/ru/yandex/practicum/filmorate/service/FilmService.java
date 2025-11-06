@@ -6,92 +6,78 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-
+import ru.yandex.practicum.filmorate.storage.dao.FriendDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.LikeDbStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-
 public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserService userService;
-    private final Map<Long, Set<Long>> filmLikes = new HashMap<>();
+    private final LikeDbStorage likeDbStorage;
+    private final FriendDbStorage friendDbStorage;
 
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, UserService userService) {
+    public FilmService(
+            @Qualifier("filmDbStorage") FilmStorage filmStorage,
+            UserService userService,
+            LikeDbStorage likeDbStorage,
+            FriendDbStorage friendDbStorage
+    ) {
         this.filmStorage = filmStorage;
         this.userService = userService;
+        this.likeDbStorage = likeDbStorage;
+        this.friendDbStorage = friendDbStorage;
     }
 
-
     public Film create(Film film) {
+        log.info("Создание фильма: {}", film.getName());
         Film created = filmStorage.create(film);
-        log.info("Создан фильм: id={}, name={}", created.getId(), created.getName());
+        log.info("Фильм успешно создан: id={}, name={}", created.getId(), created.getName());
         return created;
     }
 
-
     public Film save(Film updatedFilm) {
         Long id = updatedFilm.getId();
-        Optional<Film> optionalFilm = filmStorage.findById(id);
-
-        if (optionalFilm.isEmpty()) {
-            String errorMessage = String.format("Не найден фильм с %d", id);
-            log.error(errorMessage);
-            throw new NotFoundException(errorMessage);
+        if (id == null || filmStorage.findById(id).isEmpty()) {
+            throw new NotFoundException("Фильм с id=" + id + " не найден");
         }
-        updatedFilm = filmStorage.save(updatedFilm);
-        log.info("Фильм обновлён: id={}, name={}", updatedFilm.getId(), updatedFilm.getName());
-        return updatedFilm;
+        Film saved = filmStorage.save(updatedFilm);
+        log.info("Фильм обновлён: id={}, name={}", saved.getId(), saved.getName());
+        return saved;
     }
-
 
     public List<Film> findAll() {
         log.info("Получение списка всех фильмов");
         return filmStorage.findAll();
     }
 
-
     public Film findById(Long id) {
         log.info("Поиск фильма по id={}", id);
         return filmStorage.findById(id)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + id + " не найден"));
+                .orElseThrow(() -> new NotFoundException("Фильм с id=" + id + " не найден"));
     }
 
     public void addLike(Long filmId, Long userId) {
         log.info("Добавление лайка: фильм {} ← пользователь {}", filmId, userId);
-
-        if (filmStorage.findById(filmId).isEmpty()) {
-            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
-        }
-
+        Film film = findById(filmId);
         userService.findById(userId);
-        filmLikes.computeIfAbsent(filmId, k -> new HashSet<>()).add(userId);
-        log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
+        likeDbStorage.addLike(filmId, userId);
+        log.info("Лайк успешно добавлен пользователем {} фильму {}", userId, film.getName());
     }
 
     public void removeLike(Long filmId, Long userId) {
         log.info("Удаление лайка: фильм {} → пользователь {}", filmId, userId);
-
-        if (filmStorage.findById(filmId).isEmpty()) {
-            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
-        }
-
+        findById(filmId);
         userService.findById(userId);
-
-        filmLikes.getOrDefault(filmId, new HashSet<>()).remove(userId);
-        log.info("Пользователь {} убрал лайк у фильма {}", userId, filmId);
+        likeDbStorage.removeLike(filmId, userId);
+        log.info("Лайк успешно удалён пользователем {} у фильма {}", userId, filmId);
     }
 
     public List<Film> getMostPopularFilms(int count) {
-        return filmStorage.findAll().stream()
-                .sorted((f1, f2) -> Integer.compare(
-                        filmLikes.getOrDefault(f2.getId(), Set.of()).size(),
-                        filmLikes.getOrDefault(f1.getId(), Set.of()).size()
-                ))
-                .limit(count)
-                .collect(Collectors.toList());
+        log.info("Получение списка самых популярных фильмов (топ {})", count);
+        return filmStorage.findMostPopular(count);
     }
 }

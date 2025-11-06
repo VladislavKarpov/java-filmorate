@@ -23,7 +23,7 @@ public class UserDbStorageTest {
     private final UserDbStorage userDbStorage;
 
     @Test
-    void testCreateAndFindUser() {
+    public void testCreateAndFindUser() {
         User user = new User();
         user.setEmail("test@test.com");
         user.setLogin("tester");

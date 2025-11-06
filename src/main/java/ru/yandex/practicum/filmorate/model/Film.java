@@ -31,8 +31,6 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
     private Integer duration;
 
-    private Set<Integer> genreIds;
-
     private List<Genre> genres;
 
     @NotNull(message = "У фильма должен быть рейтинг")
