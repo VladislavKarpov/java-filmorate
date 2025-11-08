@@ -36,7 +36,8 @@ public class FilmDbStorage implements FilmStorage {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, film.getName());
             preparedStatement.setString(2, film.getDescription());
             preparedStatement.setDate(3, Date.valueOf(film.getReleaseDate()));
@@ -46,11 +47,8 @@ public class FilmDbStorage implements FilmStorage {
         }, keyHolder);
 
         film.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
-
         insertFilmGenres(film.getId(), film.getGenres());
         film.setMpa(mpaDbStorage.findById(film.getMpa().getId()).orElse(film.getMpa()));
-        loadGenresIntoFilm(film);
-
         return film;
     }
 
@@ -78,8 +76,6 @@ public class FilmDbStorage implements FilmStorage {
 
         jdbcTemplate.update("DELETE FROM film_genres WHERE film_id = ?", film.getId());
         insertFilmGenres(film.getId(), film.getGenres());
-
-        loadGenresIntoFilm(film);
         return film;
     }
 
@@ -109,9 +105,7 @@ public class FilmDbStorage implements FilmStorage {
             return Optional.empty();
         }
 
-        Film film = films.get(0);
-        loadGenresIntoFilm(film);
-        return Optional.of(film);
+        return Optional.of(films.get(0));
     }
 
     @Override
@@ -124,7 +118,7 @@ public class FilmDbStorage implements FilmStorage {
                 ORDER BY f.id
                 """;
 
-        List<Film> films = jdbcTemplate.query(sql, (resultSet, rowNum) -> {
+        return jdbcTemplate.query(sql, (resultSet, rowNum) -> {
             Film film = new Film();
             film.setId(resultSet.getLong("id"));
             film.setName(resultSet.getString("name"));
@@ -135,9 +129,6 @@ public class FilmDbStorage implements FilmStorage {
             film.setMpa(new Mpa(resultSet.getInt("mpa_id"), resultSet.getString("mpa_name")));
             return film;
         });
-
-        films.forEach(this::loadGenresIntoFilm);
-        return films;
     }
 
     private void validateMpa(Mpa mpa) {
@@ -167,22 +158,6 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    private void loadGenresIntoFilm(Film film) {
-        String sql = """
-                SELECT g.id, g.name
-                FROM genres g
-                JOIN film_genres fg ON g.id = fg.genre_id
-                WHERE fg.film_id = ?
-                ORDER BY g.id
-                """;
-
-        List<Genre> genres = jdbcTemplate.query(sql,
-                (rs, rowNum) -> new Genre(rs.getInt("id"), rs.getString("name")),
-                film.getId());
-
-        film.setGenres(genres);
-    }
-
     @Override
     public List<Film> findMostPopular(int count) {
         String sql = """
@@ -196,20 +171,16 @@ public class FilmDbStorage implements FilmStorage {
                 LIMIT ?
                 """;
 
-        List<Film> films = jdbcTemplate.query(sql, (resultSet, rowNum) -> {
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Film film = new Film();
-            film.setId(resultSet.getLong("id"));
-            film.setName(resultSet.getString("name"));
-            film.setDescription(resultSet.getString("description"));
-            film.setDuration(resultSet.getInt("duration"));
-            film.setMpa(new Mpa(resultSet.getInt("mpa_id"), resultSet.getString("mpa_name")));
+            film.setId(rs.getLong("id"));
+            film.setName(rs.getString("name"));
+            film.setDescription(rs.getString("description"));
+            Date releaseDate = rs.getDate("release_date");
+            if (releaseDate != null) film.setReleaseDate(releaseDate.toLocalDate());
+            film.setDuration(rs.getInt("duration"));
+            film.setMpa(new Mpa(rs.getInt("mpa_id"), rs.getString("mpa_name")));
             return film;
         }, count);
-
-        for (Film film : films) {
-            loadGenresIntoFilm(film);
-        }
-
-        return films;
     }
 }
