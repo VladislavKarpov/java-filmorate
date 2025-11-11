@@ -14,3 +14,4 @@ public interface UserStorage {
 
     Optional<User> findById(Long id);
 }
+

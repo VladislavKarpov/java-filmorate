@@ -15,4 +15,6 @@ public interface FilmStorage {
 
     Optional<Film> findById(Long id);
 
+    List<Film> findMostPopular(int count);
+
 }

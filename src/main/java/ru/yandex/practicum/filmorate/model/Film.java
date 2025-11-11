@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class Film {
@@ -28,4 +29,9 @@ public class Film {
 
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
     private Integer duration;
+
+    private List<Genre> genres;
+
+    @NotNull(message = "У фильма должен быть рейтинг")
+    private Mpa mpa;
 }
